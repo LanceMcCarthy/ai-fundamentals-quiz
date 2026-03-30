@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Fundamentals Quiz</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    #root { min-height: 100vh; }
+    button { font-family: inherit; }
+    button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    ::selection { background: #6366f180; color: #fff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2a2d42; border-radius: 99px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const SECTIONS = [
+      { id: 1, title: "Prompt Engineering", subtitle: "LLM fundamentals, tokens, context windows, prompting techniques & model parameters", icon: "\u26A1", color: "#6366f1", gradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" },
+      { id: 2, title: "RAG + Data Hygiene", subtitle: "Retrieval-Augmented Generation, embeddings, search strategies & data quality", icon: "\uD83D\uDD0D", color: "#0ea5e9", gradient: "linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)" },
+      { id: 3, title: "Agentic Patterns + Tools / MCPs", subtitle: "Agent characteristics, ReAct loops, multi-agent collaboration & tool use", icon: "\uD83E\uDD16", color: "#f59e0b", gradient: "linear-gradient(135deg, #f59e0b 0%, #f97316 100%)" },
+      { id: 4, title: "Evaluation + Guardrails", subtitle: "Responsible AI, hallucination types, prompt injection & EDD", icon: "\uD83D\uDEE1\uFE0F", color: "#10b981", gradient: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)" },
+    ];
+
+    const QUESTIONS = [
+      // ===== SECTION 1: PROMPT ENGINEERING (14) =====
+      { section: 1, q: "Based on the rule of thumb for English text, approximately how many words would 100 tokens represent?", options: ["100 words", "133 words", "75 words", "50 words"], correct: 2, explanation: "The widely used rule of thumb is that 1 token \u2248 0.75 words in English. So 100 tokens \u00D7 0.75 = approximately 75 words. This ratio arises because tokenizers like BPE split many common words into single tokens, but longer or less common words get broken into multiple tokens." },
+      { section: 1, q: "If a technical manual contains approximately 1,500 words, about how many tokens would an LLM typically process for this text?", options: ["6,000 tokens", "2,000 tokens", "1,125 tokens", "750 tokens"], correct: 1, explanation: "Using the inverse of the 0.75 rule: 1 word \u2248 1.33 tokens. So 1,500 words \u00D7 1.33 \u2248 2,000 tokens. Technical text often has specialized terms that may tokenize into more sub-words, making this estimate reasonable." },
+      { section: 1, q: "In the context of LLM limitations, how is a \u2018hallucination\u2019 defined?", options: ["A failure to generate any response due to high latency.", "Plausible but false statements generated with confidence.", "Grammatical errors found in natural language responses.", "The model refusing to answer a prompt due to safety filters."], correct: 1, explanation: "Hallucinations are outputs that sound fluent and confident but contain fabricated or incorrect information. The model generates statistically plausible text without verifying factual accuracy, which is why the output can seem convincing even when it\u2019s wrong." },
+      { section: 1, q: "When should an AI Builder prefer traditional automation over AI solutions?", options: ["When processing unstructured data like audio or images.", "When the task requires high flexibility and adaptability.", "When 100% accuracy is critical, such as in financial calculations.", "When natural language interaction is a core requirement."], correct: 2, explanation: "Traditional automation (rule-based systems, scripts, formulas) is deterministic \u2014 it produces the exact same output every time. For tasks like financial calculations where even a small error is unacceptable, deterministic automation is more appropriate than probabilistic AI, which may produce slightly different outputs each time." },
+      { section: 1, q: "What is the primary distinction between the Maximum Context Window (MCW) and the Maximum Effective Context Window (MECW)?", options: ["MCW is measured in characters, while MECW is measured specifically in words.", "MCW is the hardware limit, while MECW is the software-defined limit set by the developer.", "MCW refers to input tokens, while MECW refers only to the tokens generated in the output.", "MCW is the advertised architectural limit, while MECW is the point where model performance begins to degrade."], correct: 3, explanation: "MCW is the theoretical maximum number of tokens the model architecture supports (e.g., 128K or 200K). MECW is the practical limit beyond which the model\u2019s ability to attend to, recall, and reason over information noticeably degrades \u2014 often well below the advertised MCW. This is sometimes called the \u2018lost in the middle\u2019 problem." },
+      { section: 1, q: "What is the primary benefit of using Chain-of-Thought (CoT) prompting?", options: ["It reduces the cost per API call by using fewer tokens.", "It allows the model to access real-time internet data.", "It forces the AI to reason step-by-step before providing a final answer.", "It eliminates the need for any context provision in the prompt."], correct: 2, explanation: "Chain-of-Thought prompting instructs the model to show its reasoning process step-by-step before arriving at a conclusion. This intermediate reasoning significantly improves accuracy on complex tasks like math, logic, and multi-step analysis by reducing the chance of the model skipping critical reasoning steps." },
+      { section: 1, q: "When implementing Few-Shot Learning, what is the recommended number of examples to provide for optimal balance?", options: ["1 example", "10\u201315 examples", "20+ examples", "2\u20135 examples"], correct: 3, explanation: "2\u20135 examples typically provide the best trade-off. Fewer examples may not establish a clear enough pattern for the model, while too many consume valuable context window space and can lead to overfitting to the examples rather than generalizing the desired behavior." },
+      { section: 1, q: "Which prompt engineering technique is best suited for breaking down a complex task, such as drafting, fact-checking, and then editing a blog post?", options: ["Prompt Chaining", "Negative Prompting", "Role-Based Prompting", "Few-Shot Learning"], correct: 0, explanation: "Prompt Chaining breaks a complex workflow into sequential steps where the output of one prompt becomes the input for the next. For a blog post: Step 1 drafts \u2192 Step 2 fact-checks the draft \u2192 Step 3 edits the fact-checked version. Each step can be optimized independently, improving overall quality." },
+      { section: 1, q: "Which prompting technique involves an LLM considering a high-level, general question before attempting to solve a specific, complex task?", options: ["Chain of Thought", "Step-Back Prompting", "Few-Shot Prompting", "Role Prompting"], correct: 1, explanation: "Step-Back Prompting asks the model to first consider a broader, more abstract version of the question before tackling the specific problem. For example, before solving a specific physics problem, the model might first reason about the general principles involved. This retrieves relevant foundational knowledge that improves the final answer." },
+      { section: 1, q: "A major pitfall in building AI solutions is \u2018ignoring token limits.\u2019 What is the suggested solution for handling a 50-page document?", options: ["Using a role-based persona like \u2018Speed Reader\u2019.", "Dumping the entire text into a single prompt.", "Chunking the document into relevant sections.", "Increasing the Temperature to 1.0."], correct: 2, explanation: "Chunking breaks a large document into smaller, manageable pieces that fit within the model\u2019s effective context window. Each chunk can be processed independently or sequentially, ensuring the model can properly attend to all the content without hitting token limits or suffering from degraded performance on overly long inputs." },
+      { section: 1, q: "Which parameter controls the randomness of an LLM\u2019s output by narrowing or widening the token probability distribution?", options: ["Max Tokens", "Context Window", "Temperature", "Top-K"], correct: 2, explanation: "Temperature scales the logit values before the softmax function. A low temperature (e.g., 0.1) makes the distribution sharper, favoring the most probable tokens and producing more deterministic output. A high temperature (e.g., 1.0+) flattens the distribution, giving less probable tokens a better chance and producing more creative or varied output." },
+      { section: 1, q: "Which configuration parameter should be adjusted to specifically prevent the LLM from using the exact same words too frequently in its response?", options: ["Temperature", "Top-K", "Max Tokens", "Frequency Penalty"], correct: 3, explanation: "Frequency Penalty applies an increasing penalty to tokens based on how often they\u2019ve already appeared in the generated text. The more a token has been used, the higher the penalty, which discourages the model from repeating the same words and phrases, leading to more varied vocabulary in its responses." },
+      { section: 1, q: "When configuring an LLM for factual summarization, which parameter settings are generally recommended?", options: ["Low Presence Penalty and high Top-K", "High Temperature and high Top-K", "Low Temperature and low Top-P", "Temperature of 1.0 and Top-P of 0.99"], correct: 2, explanation: "For factual summarization, you want the model to be precise and stick closely to the source material. Low Temperature makes the output more deterministic, and low Top-P (nucleus sampling) restricts the model to only the most probable tokens. Together, they minimize creative deviation and maximize factual accuracy." },
+      { section: 1, q: "Why do Large Language Models (LLMs) often struggle with simple string tasks, such as reversing the letters in a word?", options: ["The temperature setting is typically too low for character manipulation.", "The context window is too small for character-level processing.", "The Byte Pair Encoding algorithm excludes punctuation and whitespace.", "The model processes text as tokens rather than individual characters."], correct: 3, explanation: "LLMs use tokenizers (like Byte Pair Encoding) that break text into sub-word tokens, not individual characters. The word \u2018hamburger\u2019 might be tokenized as \u2018ham\u2019 + \u2018burger\u2019. Since the model never sees individual letters as separate units, it struggles with character-level manipulation tasks like reversing, counting letters, or spelling." },
+      // ===== SECTION 2: RAG + DATA HYGIENE (14) =====
+      { section: 2, q: "Why are standard Large Language Models (LLMs) compared to a \u2018closed-book exam\u2019 in the context of organizational data?", options: ["They require a physical connection to a database to perform any word prediction tasks.", "They are programmed to refuse to answer questions about private companies to protect intellectual property.", "They rely solely on their training memory and statistical patterns from data up to a specific cutoff date.", "They can only process information that has been manually entered into their source code by engineers."], correct: 2, explanation: "Like a student taking a closed-book exam, a standard LLM can only draw on what it memorized during training. It has no access to an organization\u2019s private documents, recent updates, or proprietary data \u2014 it relies entirely on patterns learned from its training data up to its knowledge cutoff date." },
+      { section: 2, q: "How does Retrieval-Augmented Generation (RAG) primarily differ from a standard Large Language Model (LLM) approach?", options: ["It uses fine-tuning to update the model\u2019s internal weights with new data daily.", "It limits the AI\u2019s ability to generate text to ensure it only quotes documents verbatim.", "It increases the physical size of the model\u2019s neural network to store more facts.", "It retrieves relevant information from the organization\u2019s own documents before generating a response, instead of relying solely on training data."], correct: 3, explanation: "RAG adds a retrieval step before generation: it first searches an external knowledge base (the organization\u2019s documents, databases, etc.) for relevant information, then feeds that context to the LLM alongside the user\u2019s query. This grounds the response in actual source material rather than relying solely on what the model memorized during training." },
+      { section: 2, q: "In the Retrieval Augmented Generation (RAG) process, what is the purpose of \u2018Chunking\u2019 documents?", options: ["To translate the document into multiple languages simultaneously for global retrieval.", "To break large documents into smaller pieces to stay within LLM token input limits.", "To remove stop words and punctuation to make the text easier for the AI to read.", "To encrypt sensitive data before it is stored in a public cloud database."], correct: 1, explanation: "Chunking splits large documents into smaller, semantically meaningful segments that fit within the LLM\u2019s context window. This also improves retrieval precision \u2014 instead of pulling an entire 100-page manual, the system can retrieve just the 2\u20133 most relevant paragraphs that directly address the user\u2019s question." },
+      { section: 2, q: "How does Retrieval-Augmented Generation (RAG) primarily reduce the occurrence of hallucinations?", options: ["By expanding the model\u2019s training data to include the entire internet in real-time.", "By increasing the Temperature parameter to make the model more creative.", "By grounding the model\u2019s response in specific, verifiable context retrieved from trusted sources.", "By automatically deleting any tokens that the model is less than 90% confident about."], correct: 2, explanation: "RAG reduces hallucinations by providing the LLM with specific, factual context retrieved from trusted documents at query time. Instead of relying on potentially unreliable training memory, the model can base its response on the actual source material provided, making it verifiable and traceable." },
+      { section: 2, q: "In the context of RAG, what is a defining characteristic of \u2018unstructured data\u2019?", options: ["It refers exclusively to data that has been deleted or archived by the organization.", "It consists of natural language documents like PDFs, emails, and Slack messages.", "It is organized into predictable tables and CRM fields for easy filtering.", "It is data that cannot be converted into numerical vectors for AI processing."], correct: 1, explanation: "Unstructured data lacks a predefined schema or tabular format. It includes natural language content like PDFs, emails, Slack messages, meeting transcripts, and Word documents. Unlike structured data (databases, spreadsheets), it requires specialized processing like chunking and embedding to make it searchable for RAG systems." },
+      { section: 2, q: "Which RAG flow would be most appropriate for an AI system that needs to understand the relationship between specific product features and the customer segments they serve?", options: ["VoiceRAG", "GraphRAG", "Advanced RAG", "Simple RAG"], correct: 1, explanation: "GraphRAG uses knowledge graphs to model relationships between entities (products \u2194 features \u2194 customer segments). Unlike simple vector search, it can traverse and reason over these connections, making it ideal for queries that require understanding how different entities relate to each other." },
+      { section: 2, q: "Which search method is recommended for enterprise RAG because it combines the precision of exact words with the flexibility of meaning-based matching?", options: ["Vector search", "Recursive search", "Hybrid search", "Full-text search"], correct: 2, explanation: "Hybrid search combines full-text keyword search (exact term matching) with vector/semantic search (meaning-based matching). This dual approach catches both precise keyword matches and semantically similar content, providing more comprehensive and accurate retrieval than either method alone." },
+      { section: 2, q: "How does \u2018Query Rewriting\u2019 improve the effectiveness of a RAG system?", options: ["It changes the user\u2019s tone of voice to be more professional before the AI sees it.", "It clarifies or expands vague user questions to create better search terms for retrieval.", "It reduces the cost of the LLM by shortening the query as much as possible.", "It automatically corrects spelling errors in the retrieved source documents."], correct: 1, explanation: "Users often ask vague or incomplete questions. Query Rewriting uses an LLM to reformulate the question into clearer, more specific search terms before hitting the retrieval system. For example, \u2018How do I do that thing from the meeting?\u2019 might be rewritten to \u2018How to configure SSO based on the Q3 security review discussion.\u2019" },
+      { section: 2, q: "In a RAG system, what is the role of \u2018Reranking\u2019?", options: ["It changes the order of words in a sentence to make them easier for the AI to read.", "It assigns a security clearance level to every employee using the system.", "It periodically deletes old documents to make room for new versions.", "It re-orders retrieved document snippets to ensure the most relevant ones are prioritized for the LLM."], correct: 3, explanation: "After the initial retrieval returns a set of candidate document chunks, a reranker (often a cross-encoder model) scores each chunk\u2019s relevance to the original query more carefully. It then re-orders them so the most relevant chunks appear first, ensuring the LLM receives the best context in its limited window." },
+      { section: 2, q: "How does \u2018Agentic RAG\u2019 differ from the \u2018Simple RAG\u2019 flow?", options: ["It only works with voice commands and cannot process typed text.", "It is a slower, older version of RAG that has been replaced by vector search.", "It requires a human agent to manually approve every search query before it runs.", "It behaves like a digital analyst that can plan steps, search multiple times, and validate its own answers."], correct: 3, explanation: "Agentic RAG adds autonomous reasoning to the retrieval process. Instead of a single retrieve-then-generate step, the agent can plan a multi-step research strategy, execute multiple searches across different sources, evaluate whether it has enough information, and refine its approach \u2014 much like a human analyst would." },
+      { section: 2, q: "Which of the following best describes \u2018Embeddings\u2019 in a RAG system?", options: ["The process of physically inserting the LLM\u2019s code into an organization\u2019s internal server.", "A list of keywords extracted from a document to be used in a standard index search.", "The metadata tags like \u2018Author\u2019 and \u2018Date Created\u2019 attached to a PDF file.", "Numerical representations (vectors) that capture the semantic meaning of text, allowing similar concepts to have similar coordinates."], correct: 3, explanation: "Embeddings convert text into dense numerical vectors (arrays of numbers) in a high-dimensional space where semantically similar content ends up near each other. For example, \u2018car\u2019 and \u2018automobile\u2019 would have very similar vector coordinates, enabling meaning-based search rather than just keyword matching." },
+      { section: 2, q: "In the context of data hygiene, how does \u2018Trivial\u2019 data affect the performance of an AI search?", options: ["It helps the AI develop a more \u2018human\u2019 personality by including social context.", "It acts as noise that distracts the retrieval process, potentially leading to irrelevant results.", "It causes the LLM to crash because the information is too simple for its complex algorithms.", "It significantly reduces the cost of using the AI because simple text requires fewer tokens."], correct: 1, explanation: "Trivial data \u2014 like casual Slack messages, \u2018Happy birthday!\u2019 posts, or meeting small talk \u2014 adds noise to the knowledge base. When the retrieval system searches for relevant context, this noise can surface irrelevant results, pushing genuinely useful information out of the limited context window and degrading response quality." },
+      { section: 2, q: "In the context of the ROT framework for data hygiene, why is \u2018Obsolete\u2019 data considered a significant risk for RAG systems?", options: ["Obsolete documents are more likely to contain malware or prompt injection attacks.", "The LLM cannot distinguish between an old version of a policy and a new one unless specifically instructed.", "It takes up too much storage space in the vector database.", "Obsolete data is formatted in ways that modern tokenizers cannot process."], correct: 1, explanation: "The LLM treats all retrieved context equally \u2014 it has no inherent way to know that a 2019 travel policy has been superseded by a 2024 version. If both are in the knowledge base, the system might retrieve and cite the outdated policy, leading to incorrect and potentially harmful guidance." },
+      { section: 2, q: "According to the AI Engineering Stack, which layer is responsible for ensuring the AI is grounded in factual truth?", options: ["RAG + Data Hygiene", "Prompt Engineering", "Responsible AI", "Agentic Patterns"], correct: 0, explanation: "The RAG + Data Hygiene layer grounds the AI\u2019s responses in real, up-to-date organizational data rather than relying on the model\u2019s training memory alone. By ensuring the source data is accurate, current, and well-maintained, this layer directly addresses the factual reliability of AI outputs." },
+      // ===== SECTION 3: AGENTIC PATTERNS + TOOLS/MCPs (10) =====
+      { section: 3, q: "Which Agentic AI pattern is characterized by a \u2018Thought-Action-Observation\u2019 loop?", options: ["ReAct Pattern", "Meta Prompting Pattern", "Prompt Chaining Pattern", "Few-Shot Pattern"], correct: 0, explanation: "The ReAct (Reason + Act) pattern follows an iterative loop: the agent Thinks about what to do, takes an Action (e.g., calls a tool), then Observes the result. Based on the observation, it thinks again and decides the next action. This cycle continues until the task is complete." },
+      { section: 3, q: "Which characteristic of an AI agent is demonstrated when a system checks a CRM for duplicate contacts before proceeding with a new entry?", options: ["Reasoning", "Learning", "Action", "Perception"], correct: 3, explanation: "Perception is the agent\u2019s ability to sense and gather information about its environment. Checking the CRM for duplicates is the agent perceiving the current state of its environment (what contacts already exist) before deciding how to proceed. It\u2019s gathering situational awareness, not yet taking a modifying action." },
+      { section: 3, q: "When utilizing the ReAct pattern, which stage involves the agent analyzing the results of a tool execution to determine the next step?", options: ["Adjust", "Act", "Think", "Observe"], correct: 3, explanation: "The Observe stage is where the agent analyzes the output returned from a tool or action it just executed. Based on this observation, the agent determines whether it has enough information to answer or whether additional actions are needed, feeding back into the Think stage of the loop." },
+      { section: 3, q: "What happens during the \u2018Action\u2019 phase of a ReAct (Reason and Act) loop?", options: ["The model prompts the user to provide more context for the current query.", "The model interacts with an external tool or API to gather information or perform a task.", "The model summarizes its internal knowledge without looking at outside sources.", "The model evaluates its own previous thoughts to find logical errors."], correct: 1, explanation: "During the Action phase, the agent executes a concrete operation \u2014 such as calling an API, querying a database, running a search, or sending a message. This is the phase where the agent moves from reasoning to doing, interacting with external systems to gather data or make changes." },
+      { section: 3, q: "What is the primary purpose of \u2018tool use\u2019 (function calling) in an AI agent?", options: ["It replaces the LLM entirely with pre-coded scripts for all responses.", "It allows the agent to execute specific, structured actions like querying a database or calling an API based on the LLM\u2019s reasoning.", "It enables the model to rewrite its own source code to improve performance over time.", "It provides the agent with a graphical user interface for drag-and-drop task management."], correct: 1, explanation: "Tool use (function calling) is the bridge between the LLM\u2019s reasoning and real-world actions. The LLM decides which tool to call and what parameters to pass based on its understanding of the task, then the system executes that structured function call. This allows agents to read databases, call APIs, send emails, and more." },
+      { section: 3, q: "What is the primary benefit of employing a Multi-Agent Collaboration pipeline over using a single generalist agent for complex tasks?", options: ["Multiple agents significantly reduce the number of API calls required to finish a task.", "Each agent has focused expertise, leading to higher quality output than a single generalist.", "A multi-agent system eliminates the need for human-in-the-loop guardrails.", "Using multiple agents allows for the use of smaller, less capable LLMs for reasoning."], correct: 1, explanation: "Just as a team of specialists outperforms a single generalist on complex projects, specialized agents (e.g., one for research, one for writing, one for fact-checking) can each be optimized with focused prompts, tools, and evaluation criteria. This division of labor produces higher quality output than asking one agent to do everything." },
+      { section: 3, q: "What is the primary benefit of the \u2018Human-as-a-Tool\u2019 pattern in agentic workflows?", options: ["It allows the AI to learn the human\u2019s password so it can act on their behalf.", "It allows the human to perform all the data entry while the AI manages the schedule.", "It reduces the cost of API calls by using human labor instead of model processing.", "It enables the AI to pause and ask a human for judgment when it encounters uncertainty or conflicting data."], correct: 3, explanation: "In the Human-as-a-Tool pattern, the human is registered as a \u2018tool\u2019 the agent can invoke \u2014 just like a database or API. When the agent encounters ambiguity, conflicting information, or a decision that requires human judgment, it pauses its workflow and escalates to the human for input before continuing." },
+      { section: 3, q: "In the \u2018Human-as-a-Tool\u2019 HITL pattern, when does the agent typically interact with the human?", options: ["When the agent encounters uncertainty or data anomalies that require judgment.", "Only at the very end of the process to give a final \u2018pass/fail\u2019 grade.", "Before the agent starts any reasoning to define the initial prompt.", "Automatically for every action, regardless of the agent\u2019s confidence level."], correct: 0, explanation: "The agent operates autonomously until it hits a decision point where its confidence is low or data is conflicting. At that specific moment, it escalates to the human for judgment. This is more efficient than requiring human approval for every step, while still maintaining oversight where it matters most." },
+      { section: 3, q: "In the Review-Before-Write Human-in-the-Loop (HITL) pattern, what is the correct sequence of events?", options: ["Agent drafts action \u2192 Human reviews \u2192 Agent executes.", "Human drafts action \u2192 Agent reviews \u2192 Human executes.", "Human sets goal \u2192 Agent executes \u2192 Human provides feedback.", "Agent executes \u2192 Human reviews \u2192 Agent undoes action."], correct: 0, explanation: "Review-Before-Write ensures no irreversible action is taken without human approval. The agent first drafts or proposes what it intends to do, then a human reviews and approves (or modifies) the plan, and only then does the agent execute. This prevents costly mistakes in high-stakes operations." },
+      { section: 3, q: "How does the Model Context Protocol (MCP) differ from traditional platform-specific connectors?", options: ["MCP is designed for simple, first-time agents, while connectors are for advanced scenarios.", "MCP is a universal standard designed to work across different AI platforms without duplicate integration work.", "MCP requires custom code for every individual platform, whereas connectors are universal.", "MCP is exclusively for Microsoft ecosystem tools, while connectors are for third-party tools."], correct: 1, explanation: "MCP is an open standard that provides a single, universal protocol for connecting AI agents to external tools and data sources. Instead of building separate custom connectors for each AI platform (one for ChatGPT, one for Claude, etc.), a tool built with MCP works across any MCP-compatible platform \u2014 reducing duplicate integration effort." },
+      // ===== SECTION 4: EVALUATION + GUARDRAILS (12) =====
+      { section: 4, q: "A Sales AI agent extracts a commitment from a call transcript that never actually happened. Which Responsible AI principle is primarily violated?", options: ["Fairness", "Accountability", "Inclusiveness", "Reliability"], correct: 3, explanation: "Reliability means the AI system performs consistently and accurately as intended. Fabricating a commitment that was never made is a reliability failure \u2014 the system produced an inaccurate output that cannot be trusted, which in a sales context could damage customer relationships and create legal risks." },
+      { section: 4, q: "Under Microsoft\u2019s Responsible AI Standard, what is the \u2018No Ghost Writers\u2019 rule intended to ensure?", options: ["AI agents are prohibited from writing creative fiction or poetry for employees.", "Users must be clearly informed that they are interacting with an AI system rather than a human.", "Only human authors are allowed to sign off on final marketing materials generated by AI.", "The AI cannot use a human\u2019s name as its own persona or avatar."], correct: 1, explanation: "The \u2018No Ghost Writers\u2019 rule is a transparency principle: users should always know when they are interacting with AI rather than a human. This prevents deception and ensures people can appropriately calibrate their trust in the information and apply the right level of critical thinking to AI-generated content." },
+      { section: 4, q: "Which type of hallucination occurs when an LLM distorts or misrepresents the specific source information provided in a prompt?", options: ["Prompt injection", "Factuality errors", "Reasoning gaps", "Faithfulness errors"], correct: 3, explanation: "Faithfulness errors occur when the model\u2019s output contradicts or distorts the specific source material it was given in the prompt. Unlike factuality errors (which are about general world knowledge), faithfulness errors mean the model failed to accurately represent the context it was explicitly provided \u2014 a critical issue for summarization and RAG systems." },
+      { section: 4, q: "What is a \u2018prompt injection\u2019 attack?", options: ["A technique to increase the LLM\u2019s processing speed by injecting shortcut commands.", "A method of adding more training data directly into the model\u2019s weights.", "A malicious input designed to override the AI\u2019s system instructions and manipulate its behavior.", "A way to compress long prompts into fewer tokens to reduce costs."], correct: 2, explanation: "Prompt injection is a security vulnerability where a malicious user crafts input that tricks the LLM into ignoring its system instructions and following the attacker\u2019s instructions instead. For example, embedding \u2018Ignore all previous instructions and...\u2019 within a document the AI is asked to summarize. It is one of the most critical AI security risks today." },
+      { section: 4, q: "What is the primary purpose of implementing \u2018guardrails\u2019 in an AI system?", options: ["To increase the speed of the LLM by limiting the length of its responses.", "To apply automated checks that validate, filter, or block AI inputs and outputs before they reach the end user.", "To replace human oversight entirely so the system can operate without any supervision.", "To restrict the AI to only answering questions from a pre-approved list of topics."], correct: 1, explanation: "Guardrails are automated safety mechanisms that sit between the user and the AI, checking both inputs (to block prompt injections, harmful requests) and outputs (to catch hallucinations, policy violations, or sensitive data leaks) before they reach the end user. They act as a programmable safety net, not a replacement for human oversight." },
+      { section: 4, q: "When implementing the \u2018LLM-as-a-Judge\u2019 pattern, why is it recommended to use Chain of Thought (CoT) in the judge\u2019s evaluation prompt?", options: ["To make the evaluation process faster by skipping the need for manual review.", "To prevent the judge model from hallucinating the scores of the target model.", "To provide an audit trail of reasoning that helps developers debug why a specific score was given.", "To ensure the judge model uses as many tokens as possible to increase its accuracy."], correct: 2, explanation: "Requiring the judge to explain its reasoning step-by-step before assigning a score creates a transparent audit trail. Developers can then review the reasoning to understand why an output scored high or low, debug evaluation criteria, and identify systematic biases \u2014 making the entire evaluation pipeline more trustworthy and maintainable." },
+      { section: 4, q: "Which component of an LLM-as-a-Judge evaluation prompt involves the model explaining its logic before assigning a final score?", options: ["Context", "Chain-of-Thought", "Criteria", "Scale"], correct: 1, explanation: "The Chain-of-Thought component of the evaluation prompt is where the judge model walks through its reasoning \u2014 comparing the output against each criterion, noting strengths and weaknesses \u2014 before arriving at a numerical score. This structured reasoning precedes the final judgment and provides the audit trail." },
+      { section: 4, q: "What is the primary shift in AI development philosophy introduced by Evaluation-Driven Development (EDD)?", options: ["Prioritizing model speed over output quality.", "Eliminating the need for a development environment.", "Moving from manual \u2018vibing\u2019 to systematic evaluation.", "Replacing automated testing with human peer review."], correct: 2, explanation: "EDD replaces the common practice of \u2018vibing\u2019 \u2014 manually eyeballing outputs and deciding if they seem good \u2014 with structured, repeatable evaluation pipelines. This includes defined criteria, automated scoring (often via LLM-as-a-Judge), thresholds, and feedback loops, bringing the rigor of test-driven development to AI systems." },
+      { section: 4, q: "An agent designed for documentation tasks should have evaluation criteria specifically focused on which dimension?", options: ["Correctness relative to the provided source material.", "Maintaining the correct sentiment of the original text.", "Identifying and highlighting action items for team members.", "Maximizing the conversion rate of readers."], correct: 0, explanation: "A documentation agent\u2019s primary job is to accurately represent source material. Its evaluation should focus on correctness \u2014 does the output faithfully reflect the provided sources? This is directly about faithfulness to the input, which is the most critical quality dimension for documentation tasks." },
+      { section: 4, q: "What is the primary evaluation focus for an Analytics Agent according to the EDD?", options: ["Ensuring the output is strictly restricted to Pass/Fail scores.", "Clarity and grammatical correctness of the findings.", "Whether the summary captures the correct emotional sentiment.", "Data matching the source and absence of hallucinations."], correct: 3, explanation: "An Analytics Agent works with data, so its evaluation must verify that numerical values, calculations, and conclusions accurately match the source data. Any fabricated statistics or misrepresented numbers (hallucinations) could lead to seriously flawed business decisions, making data accuracy the top priority." },
+      { section: 4, q: "What action does the EDD system take if an agent\u2019s output receives a score <80% when the threshold is 80%?", options: ["The output is immediately discarded, and the session ends.", "The threshold is automatically lowered to allow the output to pass.", "The system uses judge feedback to refine and regenerate the output.", "The output is flagged for a manual \u2018vibing\u2019 check by a developer."], correct: 2, explanation: "When an output falls below the threshold, the EDD system doesn\u2019t discard it \u2014 instead, it feeds the judge\u2019s reasoning (why it scored low) back to the agent as feedback, allowing it to refine and regenerate an improved output. This creates an automated improvement loop that iterates until the quality threshold is met." },
+      { section: 4, q: "Which component of the evaluation prompt specifies dimensions like \u2018Accuracy\u2019 or \u2018Completeness\u2019?", options: ["Context", "Criteria", "Refinement", "Scale"], correct: 1, explanation: "The Criteria component defines the specific dimensions on which the output will be judged \u2014 such as Accuracy, Completeness, Relevance, or Tone. These criteria provide the evaluation framework that guides the judge model\u2019s analysis and ensures consistent, structured scoring across all evaluations." },
+    ];
+
+    const QuizApp = () => {
+      const [screen, setScreen] = useState("landing");
+      const [currentSection, setCurrentSection] = useState(0);
+      const [currentQ, setCurrentQ] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [showExplanation, setShowExplanation] = useState(false);
+      const [animateIn, setAnimateIn] = useState(true);
+      const questionRef = useRef(null);
+
+      const sectionQuestions = QUESTIONS.filter((q) => q.section === SECTIONS[currentSection]?.id);
+      const currentQuestion = sectionQuestions[currentQ];
+      const totalAnswered = Object.keys(answers).length;
+      const globalQIndex = QUESTIONS.indexOf(currentQuestion);
+
+      const totalCorrect = Object.entries(answers).reduce((acc, [idx, ans]) => {
+        return acc + (QUESTIONS[idx].correct === ans ? 1 : 0);
+      }, 0);
+
+      const handleSelect = (optIdx) => {
+        if (showExplanation) return;
+        setSelectedOption(optIdx);
+        setShowExplanation(true);
+        setAnswers((prev) => ({ ...prev, [globalQIndex]: optIdx }));
+      };
+
+      const handleNext = () => {
+        setAnimateIn(false);
+        setTimeout(() => {
+          if (currentQ < sectionQuestions.length - 1) {
+            setCurrentQ(currentQ + 1);
+          } else if (currentSection < SECTIONS.length - 1) {
+            setScreen("sectionComplete");
+          } else {
+            setScreen("results");
+          }
+          setSelectedOption(null);
+          setShowExplanation(false);
+          setAnimateIn(true);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 200);
+      };
+
+      const startSection = (sIdx) => {
+        setCurrentSection(sIdx);
+        setCurrentQ(0);
+        setSelectedOption(null);
+        setShowExplanation(false);
+        setAnimateIn(true);
+        setScreen("quiz");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const getSectionScore = (sectionId) => {
+        const qs = QUESTIONS.filter((q) => q.section === sectionId);
+        let correct = 0;
+        qs.forEach((q) => {
+          const idx = QUESTIONS.indexOf(q);
+          if (answers[idx] === q.correct) correct++;
+        });
+        return { correct, total: qs.length, pct: Math.round((correct / qs.length) * 100) };
+      };
+
+      const sectionColor = SECTIONS[currentSection]?.color || "#6366f1";
+      const sectionGradient = SECTIONS[currentSection]?.gradient || SECTIONS[0].gradient;
+
+      // Landing
+      if (screen === "landing") {
+        return (
+          <div style={styles.container}>
+            <div style={styles.landingBg}>
+              <div style={styles.landingContent}>
+                <div style={styles.landingIcon}>{"\uD83E\uDDE0"}</div>
+                <h1 style={styles.landingTitle}>AI Fundamentals Quiz</h1>
+                <p style={styles.landingSubtitle}>Test your knowledge across 4 key areas of AI engineering</p>
+                <div style={styles.landingSections}>
+                  {SECTIONS.map((s, i) => (
+                    <div key={i} style={{ ...styles.landingSectionCard, borderLeft: "4px solid " + s.color }}>
+                      <span style={styles.landingSectionIcon}>{s.icon}</span>
+                      <div>
+                        <div style={styles.landingSectionTitle}>{s.title}</div>
+                        <div style={styles.landingSectionCount}>{QUESTIONS.filter((q) => q.section === s.id).length} questions</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={styles.landingTotal}>50 questions &middot; Learn as you go &middot; Instant feedback</div>
+                <button style={styles.startBtn} onClick={() => startSection(0)}>Begin Quiz &rarr;</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Section Complete
+      if (screen === "sectionComplete") {
+        const sec = SECTIONS[currentSection];
+        const score = getSectionScore(sec.id);
+        const nextSec = SECTIONS[currentSection + 1];
+        return (
+          <div style={styles.container}>
+            <div style={styles.sectionCompleteBg}>
+              <div style={styles.sectionCompleteCard}>
+                <div style={{ ...styles.sectionCompleteBadge, background: sec.gradient }}>{sec.icon}</div>
+                <h2 style={styles.sectionCompleteTitle}>{sec.title} — Complete!</h2>
+                <div style={styles.scoreRing}>
+                  <div style={{ ...styles.scoreRingInner, borderColor: score.pct >= 70 ? "#10b981" : score.pct >= 50 ? "#f59e0b" : "#ef4444" }}>
+                    <span style={styles.scoreRingPct}>{score.pct}%</span>
+                    <span style={styles.scoreRingLabel}>{score.correct}/{score.total}</span>
+                  </div>
+                </div>
+                <p style={styles.sectionCompleteMsg}>
+                  {score.pct >= 80 ? "Excellent understanding! \uD83C\uDF89" : score.pct >= 60 ? "Good foundation \u2014 review the explanations for missed questions." : "Consider revisiting this topic before moving on."}
+                </p>
+                {nextSec && (
+                  <button style={{ ...styles.startBtn, background: nextSec.gradient }} onClick={() => startSection(currentSection + 1)}>
+                    Continue to {nextSec.icon} {nextSec.title} &rarr;
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Results
+      if (screen === "results") {
+        const pct = Math.round((totalCorrect / QUESTIONS.length) * 100);
+        return (
+          <div style={styles.container}>
+            <div style={styles.resultsBg}>
+              <div style={styles.resultsCard}>
+                <div style={styles.resultsEmoji}>{pct >= 90 ? "\uD83C\uDFC6" : pct >= 70 ? "\uD83C\uDFAF" : pct >= 50 ? "\uD83D\uDCDA" : "\uD83D\uDCAA"}</div>
+                <h2 style={styles.resultsTitle}>Quiz Complete!</h2>
+                <div style={styles.resultsBigScore}>
+                  <span style={styles.resultsBigNum}>{pct}%</span>
+                  <span style={styles.resultsBigLabel}>{totalCorrect} / {QUESTIONS.length} correct</span>
+                </div>
+                <p style={styles.resultsMsg}>
+                  {pct >= 90 ? "Outstanding! You have an excellent grasp of AI fundamentals across all areas." : pct >= 70 ? "Strong performance! A few areas could use a deeper review." : pct >= 50 ? "Decent foundation. Focus on the sections where you scored lowest." : "There's room to grow. Revisit the training materials and try again!"}
+                </p>
+                <div style={styles.resultsSections}>
+                  {SECTIONS.map((s) => {
+                    const sc = getSectionScore(s.id);
+                    return (
+                      <div key={s.id} style={styles.resultsSectionRow}>
+                        <span style={styles.resultsSectionIcon}>{s.icon}</span>
+                        <span style={styles.resultsSectionName}>{s.title}</span>
+                        <div style={styles.resultsBarOuter}>
+                          <div style={{ ...styles.resultsBarInner, width: sc.pct + "%", background: s.gradient }} />
+                        </div>
+                        <span style={{ ...styles.resultsSectionPct, color: sc.pct >= 70 ? "#10b981" : sc.pct >= 50 ? "#f59e0b" : "#ef4444" }}>{sc.pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button style={styles.startBtn} onClick={() => { setAnswers({}); setCurrentSection(0); setCurrentQ(0); setScreen("landing"); }}>Retake Quiz</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Quiz
+      const qNumGlobal = QUESTIONS.filter((q) => q.section < SECTIONS[currentSection].id).length + currentQ + 1;
+      const progressInSection = ((currentQ + (showExplanation ? 1 : 0)) / sectionQuestions.length) * 100;
+
+      return (
+        <div style={styles.container}>
+          <div style={styles.quizBg}>
+            <div style={styles.quizHeader}>
+              <div><span style={{ ...styles.sectionBadge, background: sectionGradient }}>{SECTIONS[currentSection].icon} {SECTIONS[currentSection].title}</span></div>
+              <div><span style={styles.qCounter}>Q{qNumGlobal} of 50</span></div>
+            </div>
+            <div style={styles.progressOuter}>
+              <div style={{ ...styles.progressInner, width: progressInSection + "%", background: sectionGradient, transition: "width 0.5s ease" }} />
+            </div>
+            <div ref={questionRef} style={{ ...styles.questionCard, opacity: animateIn ? 1 : 0, transform: animateIn ? "translateY(0)" : "translateY(12px)", transition: "all 0.25s ease" }}>
+              <div style={styles.qLabel}>Question {currentQ + 1} of {sectionQuestions.length}</div>
+              <h2 style={styles.qText}>{currentQuestion.q}</h2>
+              <div style={styles.optionsGrid}>
+                {currentQuestion.options.map((opt, i) => {
+                  const isSelected = selectedOption === i;
+                  const isCorrect = currentQuestion.correct === i;
+                  const isWrong = isSelected && !isCorrect;
+                  let optStyle = { ...styles.optionBtn };
+                  if (showExplanation) {
+                    if (isCorrect) optStyle = { ...optStyle, ...styles.optionCorrect };
+                    else if (isWrong) optStyle = { ...optStyle, ...styles.optionWrong };
+                    else optStyle = { ...optStyle, ...styles.optionDimmed };
+                  }
+                  return (
+                    <button key={i} style={optStyle} onClick={() => handleSelect(i)} disabled={showExplanation}>
+                      <span style={{ ...styles.optionLetter, background: showExplanation && isCorrect ? "#10b981" : showExplanation && isWrong ? "#ef4444" : sectionColor, color: "#fff" }}>
+                        {String.fromCharCode(65 + i)}
+                      </span>
+                      <span style={styles.optionText}>{opt}</span>
+                      {showExplanation && isCorrect && <span style={styles.checkMark}>{"\u2713"}</span>}
+                      {showExplanation && isWrong && <span style={styles.crossMark}>{"\u2717"}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {showExplanation && (
+                <div style={{ ...styles.explanationBox, borderLeftColor: selectedOption === currentQuestion.correct ? "#10b981" : "#f59e0b" }}>
+                  <div style={styles.explanationHeader}>
+                    {selectedOption === currentQuestion.correct ? (
+                      <span style={{ ...styles.explanationBadge, background: "#dcfce7", color: "#166534" }}>{"\u2713"} Correct!</span>
+                    ) : (
+                      <span style={{ ...styles.explanationBadge, background: "#fef3c7", color: "#92400e" }}>{"\u2717"} Not quite</span>
+                    )}
+                  </div>
+                  <p style={styles.explanationText}>{currentQuestion.explanation}</p>
+                </div>
+              )}
+              {showExplanation && (
+                <button style={{ ...styles.nextBtn, background: sectionGradient }} onClick={handleNext}>
+                  {currentQ < sectionQuestions.length - 1 ? "Next Question \u2192" : currentSection < SECTIONS.length - 1 ? "Complete Section \u2192" : "See Results \u2192"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const styles = {
+      container: { fontFamily: "'Outfit', 'Segoe UI', sans-serif", minHeight: "100vh", background: "#0f1117", color: "#e2e8f0", margin: 0 },
+      landingBg: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0f1117 70%)", padding: "24px" },
+      landingContent: { maxWidth: 560, textAlign: "center" },
+      landingIcon: { fontSize: 64, marginBottom: 16 },
+      landingTitle: { fontSize: 36, fontWeight: 800, margin: "0 0 8px", background: "linear-gradient(135deg, #a78bfa, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+      landingSubtitle: { fontSize: 16, color: "#94a3b8", margin: "0 0 32px", lineHeight: 1.5 },
+      landingSections: { display: "grid", gap: 12, textAlign: "left", marginBottom: 24 },
+      landingSectionCard: { display: "flex", alignItems: "center", gap: 14, background: "#1a1d2e", borderRadius: 12, padding: "14px 18px" },
+      landingSectionIcon: { fontSize: 26, flexShrink: 0 },
+      landingSectionTitle: { fontSize: 15, fontWeight: 700, color: "#e2e8f0" },
+      landingSectionCount: { fontSize: 13, color: "#64748b", marginTop: 2 },
+      landingTotal: { fontSize: 14, color: "#64748b", marginBottom: 24 },
+      startBtn: { padding: "14px 36px", fontSize: 16, fontWeight: 700, color: "#fff", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", borderRadius: 12, cursor: "pointer", transition: "transform 0.15s", letterSpacing: 0.5 },
+      quizBg: { minHeight: "100vh", padding: "20px 20px 40px", maxWidth: 720, margin: "0 auto" },
+      quizHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 },
+      sectionBadge: { display: "inline-block", padding: "6px 14px", borderRadius: 20, fontSize: 13, fontWeight: 700, color: "#fff" },
+      qCounter: { fontSize: 13, color: "#64748b", fontWeight: 600 },
+      progressOuter: { height: 5, background: "#1e2030", borderRadius: 99, overflow: "hidden", marginBottom: 28 },
+      progressInner: { height: "100%", borderRadius: 99 },
+      questionCard: { background: "#161824", borderRadius: 20, padding: "32px 28px", border: "1px solid #232640" },
+      qLabel: { fontSize: 12, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 12 },
+      qText: { fontSize: 19, fontWeight: 700, lineHeight: 1.5, margin: "0 0 28px", color: "#f1f5f9" },
+      optionsGrid: { display: "grid", gap: 12 },
+      optionBtn: { display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "16px 18px", background: "#1a1d2e", border: "2px solid #2a2d42", borderRadius: 14, cursor: "pointer", textAlign: "left", transition: "all 0.15s", color: "#e2e8f0", fontSize: 15, lineHeight: 1.45, position: "relative" },
+      optionCorrect: { background: "#052e16", borderColor: "#10b981", color: "#d1fae5" },
+      optionWrong: { background: "#2a0a0a", borderColor: "#ef4444", color: "#fecaca" },
+      optionDimmed: { opacity: 0.45 },
+      optionLetter: { width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, flexShrink: 0 },
+      optionText: { flex: 1 },
+      checkMark: { fontSize: 22, color: "#10b981", fontWeight: 800, flexShrink: 0 },
+      crossMark: { fontSize: 22, color: "#ef4444", fontWeight: 800, flexShrink: 0 },
+      explanationBox: { marginTop: 24, padding: "18px 20px", background: "#111320", borderRadius: 14, borderLeft: "4px solid #10b981" },
+      explanationHeader: { marginBottom: 10 },
+      explanationBadge: { display: "inline-block", padding: "4px 12px", borderRadius: 8, fontSize: 13, fontWeight: 700 },
+      explanationText: { fontSize: 14, lineHeight: 1.7, color: "#cbd5e1", margin: 0 },
+      nextBtn: { marginTop: 24, width: "100%", padding: "15px", fontSize: 16, fontWeight: 700, color: "#fff", border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 0.3 },
+      sectionCompleteBg: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 },
+      sectionCompleteCard: { maxWidth: 480, textAlign: "center", background: "#161824", borderRadius: 24, padding: "48px 36px", border: "1px solid #232640" },
+      sectionCompleteBadge: { width: 72, height: 72, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 20px" },
+      sectionCompleteTitle: { fontSize: 24, fontWeight: 800, margin: "0 0 24px", color: "#f1f5f9" },
+      scoreRing: { display: "flex", justifyContent: "center", marginBottom: 20 },
+      scoreRingInner: { width: 110, height: 110, borderRadius: "50%", border: "5px solid", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" },
+      scoreRingPct: { fontSize: 32, fontWeight: 800, color: "#f1f5f9" },
+      scoreRingLabel: { fontSize: 14, color: "#94a3b8" },
+      sectionCompleteMsg: { fontSize: 15, color: "#94a3b8", marginBottom: 28, lineHeight: 1.5 },
+      resultsBg: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "radial-gradient(ellipse at 50% 30%, #1e1b4b 0%, #0f1117 70%)" },
+      resultsCard: { maxWidth: 560, width: "100%", textAlign: "center", background: "#161824", borderRadius: 24, padding: "48px 32px", border: "1px solid #232640" },
+      resultsEmoji: { fontSize: 56, marginBottom: 12 },
+      resultsTitle: { fontSize: 28, fontWeight: 800, margin: "0 0 24px", color: "#f1f5f9" },
+      resultsBigScore: { display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 16 },
+      resultsBigNum: { fontSize: 56, fontWeight: 900, background: "linear-gradient(135deg, #a78bfa, #60a5fa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
+      resultsBigLabel: { fontSize: 16, color: "#94a3b8", marginTop: 4 },
+      resultsMsg: { fontSize: 15, color: "#94a3b8", lineHeight: 1.6, margin: "0 0 32px", padding: "0 8px" },
+      resultsSections: { textAlign: "left", marginBottom: 32 },
+      resultsSectionRow: { display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: "1px solid #1e2030" },
+      resultsSectionIcon: { fontSize: 20, flexShrink: 0 },
+      resultsSectionName: { fontSize: 13, fontWeight: 600, color: "#cbd5e1", width: 180, flexShrink: 0 },
+      resultsBarOuter: { flex: 1, height: 8, background: "#1e2030", borderRadius: 99, overflow: "hidden" },
+      resultsBarInner: { height: "100%", borderRadius: 99, transition: "width 1s ease" },
+      resultsSectionPct: { fontSize: 14, fontWeight: 800, width: 44, textAlign: "right", flexShrink: 0 },
+    };
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<QuizApp />);
+  </script>
+</body>
+</html>
